@@ -1,12 +1,13 @@
 import React, {Component} from 'react';
 import {createStackNavigator} from 'react-navigation';
-import {View, Text, FlatList, Switch, StyleSheet, Image, Button} from 'react-native';
+import {View, Icon, Text, FlatList, Switch, StyleSheet, Image, Button} from 'react-native';
 import gql from "graphql-tag";
 import {Query} from "react-apollo";
 import styled from 'styled-components/native';
 import {Svg} from 'expo';
 import {Entypo} from '@expo/vector-icons';
 import colors from '../constants/Colors';
+import { sortBy } from "lodash";
 
 const GET_FLAGS = gql`
     {
@@ -63,6 +64,16 @@ class DashboardScreen extends Component {
       <Entypo name="menu" size={32} color="white"
               onPress={navigation.getParam('toggleDrawer')}/>
     </Hamburger>,
+    headerRight: <Button
+      title="Switch"
+      icon={
+      <Icon
+          name='cards'
+          size={15}
+          color='white'
+      />}
+      onPress={() => navigation.navigate('EnvPicker')}
+    />,
     headerStyle: {
       backgroundColor: '#3a6073',
     },
@@ -115,7 +126,7 @@ class DashboardScreen extends Component {
             if (error) return <Text>{`Error! ${error.message}`}</Text>;
             return (
               <FlatList
-                data={data.flags}
+                data={ sortBy(data.flags, [ (f) => f.key ]) }
                 renderItem={this.renderItem}
                 ItemSeparatorComponent={Separator}
                 onRefresh={() => refetch()}
