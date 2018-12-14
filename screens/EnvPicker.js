@@ -5,7 +5,7 @@ import gql from "graphql-tag";
 import {Query} from "react-apollo";
 import styled from 'styled-components/native';
 import {Entypo} from '@expo/vector-icons';
-import { map, sortBy } from "lodash";
+import { map, sortBy, keys } from "lodash";
 
 const GET_PROJECTS = gql`
     {
@@ -33,7 +33,7 @@ class EnvPicker extends Component {
 
   renderItem = ({item: {key, name}, index, section}) => {
     return (
-        <Text>{key}</Text>
+        <Text>{name || key}</Text>
     );
   };
 
@@ -50,7 +50,8 @@ class EnvPicker extends Component {
                       renderSectionHeader={({section: {name, key}}) => (
                           <Text style={{fontWeight: 'bold'}}>{name || key}</Text>
                       )}
-                      sections={ map(sortBy(data.data, [ (f) => f.name || f.key ]), (v) => {
+                      sections={
+                        map(sortBy(data.projects, [ (f) => f.name || f.key ]), (v) => {
                         title: v.name || v.key
                         data: v.environments
                       }) }

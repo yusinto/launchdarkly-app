@@ -66,12 +66,12 @@ class DashboardScreen extends Component {
     </Hamburger>,
     headerRight: <Button
       title="Switch"
-      icon={
-      <Icon
-          name='cards'
-          size={15}
-          color='white'
-      />}
+      // icon={
+      // <Icon
+      //     name='cards'
+      //     size={15}
+      //     color='white'
+      // />}
       onPress={() => navigation.navigate('EnvPicker')}
     />,
     headerStyle: {
@@ -144,4 +144,7 @@ export default createStackNavigator({
   Dashboard: {
     screen: DashboardScreen,
   },
+  EnvPicker: {
+    screen: EnvPicker
+  }
 });

@@ -6,20 +6,10 @@ import {HttpLink} from 'apollo-link-http';
 import {ApolloProvider} from 'react-apollo';
 import Dashboard from './screens/Dashboard';
 import CustomDrawerContent from './components/CustomDrawerContent';
-import EnvPicker from "./screens/EnvPicker";
-
-const DashboardNav = createStackNavigator({
-  Dashboard: {
-    screen: Dashboard
-  },
-  EnvPicker: {
-    screen: EnvPicker
-  }
-});
 
 const App = createAppContainer(createDrawerNavigator({
   Dashboard: {
-    screen: DashboardNav,
+    screen: Dashboard,
     navigationOptions: {
       drawerLabel: 'Feature flags',
     }
