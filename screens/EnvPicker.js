@@ -28,11 +28,10 @@ const ProjectItem = styled.View`
   height: 35px;
   margin-left: 20px;
   margin-right: 30px;
-  font-size: 9px;
 `;
 
 const ProjectDisplayName = styled.Text`
-  font-size: 9px;
+  font-size: 12px;
   margin-left: 5px;
 `;
 

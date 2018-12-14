@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {createStackNavigator} from 'react-navigation';
+import {createStackNavigator, createBottomTabNavigator} from 'react-navigation';
 import {Text, FlatList, Switch, Button} from 'react-native';
 import gql from 'graphql-tag';
 import {Mutation, Query, graphql} from 'react-apollo';
@@ -9,6 +9,7 @@ import {Entypo} from '@expo/vector-icons';
 import colors from '../constants/Colors';
 import { sortBy } from "lodash";
 import EnvPicker from "./EnvPicker";
+import History from "./History";
 
 const GET_FLAGS = gql`
       query GetFlags($projKey: String!) {
@@ -60,7 +61,7 @@ const Hamburger = styled.View`
   margin-left: 10px;
 `;
 
-class DashboardScreen extends Component {
+class FlagsScreen extends Component {
   static navigationOptions = ({navigation}) => {
       const projKey = navigation.getParam('projKey');
       const envKey = navigation.getParam('envKey');
@@ -72,12 +73,12 @@ class DashboardScreen extends Component {
         </Hamburger>,
         headerRight: <Button
             title="Switch"
-            // icon={
-            // <Icon
-            //     name='cards'
-            //     size={15}
-            //     color='white'
-            // />}
+            icon={
+            <Entypo
+                name='colours'
+                size={32}
+                color='white'
+            />}
             onPress={() => navigation.navigate('EnvPicker', {
               envKey: navigation.getParam('envKey'),
               projKey: navigation.getParam('projKey'),
@@ -156,7 +157,6 @@ class DashboardScreen extends Component {
   componentDidMount() {
     const projKey = this.props.navigation.getParam("projKey") || "default";
     const envKey = this.props.navigation.getParam("envKey") || "production";
-    console.log(`ProjKey is ${projKey}`);
     this.props.navigation.setParams({
       toggleDrawer: this.toggleDrawer,
       selectEnv: this.selectEnv,
@@ -167,7 +167,6 @@ class DashboardScreen extends Component {
 
   render() {
     const projKey = this.props.navigation.getParam('projKey');
-    console.log(`Project key is: ${projKey}`);
     return (
       <Query query={GET_FLAGS} variables={{projKey}}>
         {
@@ -193,11 +192,43 @@ class DashboardScreen extends Component {
   }
 }
 
+const flagsNav = createStackNavigator({
+  Dashboard: FlagsScreen,
+  EnvPicker: EnvPicker,
+});
+
+const DashboardNav = createBottomTabNavigator({
+  Flags: {
+    screen: flagsNav,
+    navigationOptions: {
+      tabBarIcon: ({ focused })  => <Entypo name="flag" size={focused ? 32 : 24} color="white"/>,
+    },
+  },
+  History: {
+    screen: History,
+    navigationOptions: {
+      tabBarIcon: ({ focused })  => <Entypo name="clock" size={focused ? 32 : 24} color="white"/>,
+    },
+  },
+}, {
+  order: ['Flags', 'History'],
+  tabBarOptions: {
+    activeTintColor: "yellow",
+    inactiveTintColor: "white",
+    showLabel: false,
+    style: {
+      backgroundColor: '#3a6073',
+    },
+  }
+});
+
 export default createStackNavigator({
   Dashboard: {
-    screen: DashboardScreen,
+    screen: DashboardNav
   },
   EnvPicker: {
     screen: EnvPicker
-  }
+  },
+}, {
+  initialRoute: "Flags",
 });

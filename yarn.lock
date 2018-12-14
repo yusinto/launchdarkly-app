@@ -4912,6 +4912,16 @@ mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
+moment@^2.23.0:
+  version "2.23.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.23.0.tgz#759ea491ac97d54bac5ad776996e2a58cc1bc225"
+  integrity sha512-3IE39bHVqFbWWaPOMHZF98Q9c3LDKGTmypMiTM2QygGXXElkFWIH7GxfmlwmY2vwa+wmNsoYZmG2iusf1ZjJoA==
+
+momentjs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/momentjs/-/momentjs-2.0.0.tgz#73df904b4fa418f6e3c605e831cef6ed5518ebd4"
+  integrity sha1-c9+QS0+kGPbjxgXoMc727VUY69Q=
+
 morgan@^1.9.0:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/morgan/-/morgan-1.9.1.tgz#0a8d16734a1d9afbc824b99df87e738e58e2da59"
@@ -5655,6 +5665,11 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
+react-moment@^0.8.4:
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/react-moment/-/react-moment-0.8.4.tgz#18eb59e1541c8b216353e23c21e9db50e42e2edb"
+  integrity sha512-QhI19OcfhiAn60/O6bMR0w8ApXrPFCjv6+eV0I/P9/AswzjgEAx4L7VxMBCpS/jrythLa12Q9v88req+ys4YpA==
+
 react-native-branch@2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/react-native-branch/-/react-native-branch-2.2.5.tgz#4074dd63b4973e6397d9ce50e97b57c77a518e9d"
@@ -5681,6 +5696,15 @@ react-native-gesture-handler@^1.0.0:
 react-native-maps@expo/react-native-maps#v0.22.1-exp.0:
   version "0.22.1"
   resolved "https://codeload.github.com/expo/react-native-maps/tar.gz/e6f98ff7272e5d0a7fe974a41f28593af2d77bb2"
+
+react-native-markdown-view@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/react-native-markdown-view/-/react-native-markdown-view-1.1.4.tgz#390fdbe2ececa92505572efe1911ec2c7fe8bc13"
+  integrity sha512-dW4I+pqTGXBt4JRnTuo40N1u/m7P72wxqD+qwQoNzRqKNo/wP2N70Gokn3/5+u8orXK/kUbnxxLEQauF7+4tFg==
+  dependencies:
+    prop-types "^15.5.10"
+    react-native-tabular-grid-markdown-view "0.1.x"
+    simple-markdown "0.3.x"
 
 react-native-platform-touchable@^1.1.1:
   version "1.1.1"
@@ -5731,6 +5755,13 @@ react-native-tab-view@^1.0.0, react-native-tab-view@^1.2.0:
   integrity sha512-QNt6VkEW8SP1UJ7yjD5P4bOTWwHQfoIMD5CqnA06pcubdNwHR1NmjiNZsVnIvp5wAEVbW6yTHjLXOh1fzab4xg==
   dependencies:
     prop-types "^15.6.1"
+
+react-native-tabular-grid-markdown-view@0.1.x:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-tabular-grid-markdown-view/-/react-native-tabular-grid-markdown-view-0.1.0.tgz#d5b3c291242373aa49ac60df43a017b39fc84338"
+  integrity sha512-K1WzwmwR53sOUpekEgBv4fN8wDVqsniJAda+FUp6hVXhRQwzj2CZDIuY1skFo/IkVlF/iyrKa1TeTHEba0aHFA==
+  dependencies:
+    prop-types "^15.5.10"
 
 react-native-vector-icons@6.0.0:
   version "6.0.0"
@@ -6318,6 +6349,11 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
+
+simple-markdown@0.3.x:
+  version "0.3.3"
+  resolved "https://registry.yarnpkg.com/simple-markdown/-/simple-markdown-0.3.3.tgz#a2c50114aa0aa9794cf30fb91b57965599b3ff00"
+  integrity sha512-2qx5eXuRP/2pH+I/EQYVzZ/XgGHg2IAHEfIZkrPbtfiOkSkd4Q1mswE7LG77I+TDz2eb2Vx2K/v/Ul0llFhplg==
 
 simple-plist@^0.2.1:
   version "0.2.1"

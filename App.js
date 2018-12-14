@@ -43,7 +43,7 @@ const App = createAppContainer(appNavigator, {
       opacity: 1
     }
   }
-}));
+});
 
 const cache = new InMemoryCache();
 const client = new ApolloClient({
