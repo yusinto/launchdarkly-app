@@ -7,7 +7,11 @@ import {ApolloProvider} from 'react-apollo';
 import Dashboard from './screens/Dashboard';
 import CustomDrawerContent from './components/CustomDrawerContent';
 
-const App = createAppContainer(createDrawerNavigator({
+// HACK: hardcode project and environment for now
+const PROJKEY = 'default';
+const ENVKEY = 'production';
+
+const appNavigator = createDrawerNavigator({
   Dashboard: {
     screen: Dashboard,
     navigationOptions: {
@@ -20,7 +24,12 @@ const App = createAppContainer(createDrawerNavigator({
       drawerLabel: 'Users',
     }
   }
-}, {
+},{
+  initialRouteName: 'Dashboard',
+  initialRouteParams: {envKey: ENVKEY, projKey: PROJKEY},
+});
+
+const App = createAppContainer(appNavigator, {
   drawerBackgroundColor: '#333',
   contentComponent: CustomDrawerContent,
   contentOptions: {
@@ -40,7 +49,8 @@ const cache = new InMemoryCache();
 const client = new ApolloClient({
   cache,
   link: new HttpLink({
-    uri: 'http://192.168.0.15:4000',
+    // uri: 'http://192.168.0.15:4000',
+    uri: 'http://10.0.99.57:4000',
   }),
 });
 

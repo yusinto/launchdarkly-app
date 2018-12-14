@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {createStackNavigator} from 'react-navigation';
-import {Text, FlatList, Switch} from 'react-native';
+import {Text, FlatList, Switch, Button} from 'react-native';
 import gql from 'graphql-tag';
 import {Mutation, Query, graphql} from 'react-apollo';
 import styled from 'styled-components/native';
@@ -8,24 +8,21 @@ import {Svg} from 'expo';
 import {Entypo} from '@expo/vector-icons';
 import colors from '../constants/Colors';
 import { sortBy } from "lodash";
-
-// HACK: hardcode project and environment for now
-const PROJKEY = 'string';
-const ENVKEY = 'production';
+import EnvPicker from "./EnvPicker";
 
 const GET_FLAGS = gql`
-    {
-        flags(projKey: "${PROJKEY}") {
-            name
-            key
-            version
-            kind
-            environments {
-                key
-                killSwitch
-            }
-        }
-    }
+      query GetFlags($projKey: String!) {
+          flags(projKey: $projKey) {
+              name
+              key
+              version
+              kind
+              environments {
+                  key
+                  killSwitch
+              }
+          }
+      }
 `;
 const TOGGLE_KILLSWITCH = gql`
     mutation ToggleKillSwitch($projKey: String!, $envKey: String!, $flagKey: String!) {
@@ -64,33 +61,41 @@ const Hamburger = styled.View`
 `;
 
 class DashboardScreen extends Component {
-  static navigationOptions = ({navigation}) => ({
-    title: 'Dashboard',
-    headerLeft: <Hamburger>
-      <Entypo name="menu" size={32} color="white"
-              onPress={navigation.getParam('toggleDrawer')}/>
-    </Hamburger>,
-    headerRight: <Button
-      title="Switch"
-      // icon={
-      // <Icon
-      //     name='cards'
-      //     size={15}
-      //     color='white'
-      // />}
-      onPress={() => navigation.navigate('EnvPicker')}
-    />,
-    headerStyle: {
-      backgroundColor: '#3a6073',
-    },
-    headerTitleStyle: {
-      color: '#fff',
-    },
-  });
+  static navigationOptions = ({navigation}) => {
+      const projKey = navigation.getParam('projKey');
+      const envKey = navigation.getParam('envKey');
+      return {
+        title: `${projKey}/${envKey}`,
+        headerLeft: <Hamburger>
+          <Entypo name="menu" size={32} color="white"
+                  onPress={navigation.getParam('toggleDrawer')}/>
+        </Hamburger>,
+        headerRight: <Button
+            title="Switch"
+            // icon={
+            // <Icon
+            //     name='cards'
+            //     size={15}
+            //     color='white'
+            // />}
+            onPress={() => navigation.navigate('EnvPicker', {
+              envKey: navigation.getParam('envKey'),
+              projKey: navigation.getParam('projKey'),
+            })}
+        />,
+        headerStyle: {
+          backgroundColor: '#3a6073',
+        },
+        headerTitleStyle: {
+          color: '#fff',
+        },
+      };
+  };
 
   renderItem = (item, toggleKillSwitch) => {
+    const envKey = this.props.navigation.getParam('envKey');
     const {name, environments} = item;
-    const {killSwitch} = environments.find(env => env.key === ENVKEY);
+    const {killSwitch} = environments.find(env => env.key === envKey);
     return (
       <ListItem>
         <ListItemLeftGroup>
@@ -113,10 +118,12 @@ class DashboardScreen extends Component {
   };
 
   handleToggle = ({key: flagKey, name, version, kind, environments}, toggleKillSwitch) => {
+    const projKey = this.props.navigation.getParam('projKey');
+    const envKey = this.props.navigation.getParam('envKey');
     toggleKillSwitch({
       variables: {
-        projKey: PROJKEY,
-        envKey: ENVKEY,
+        projKey: projKey,
+        envKey: envKey,
         flagKey,
       },
       optimisticResponse: {
@@ -128,30 +135,41 @@ class DashboardScreen extends Component {
           kind,
           environments: [{
             __typename: 'Environment',
-            key: ENVKEY,
-            killSwitch: !environments.find(env => env.key === ENVKEY).killSwitch,
+            key: envKey,
+            killSwitch: !environments.find(env => env.key === envKey).killSwitch,
           }],
         },
       },
       update: (proxy, {data: {toggleKillSwitch: {environments}}}) => {
-        const cachedData = proxy.readQuery({query: GET_FLAGS});
-        const cachedEnv = cachedData.flags.find(f => f.key === flagKey).environments.find(env => env.key === ENVKEY);
-        const updatedEnv = environments.find(env => env.key === ENVKEY);
+        const cachedData = proxy.readQuery({query: GET_FLAGS, variables: {projKey: projKey}});
+        const cachedEnv = cachedData.flags.find(f => f.key === flagKey).environments.find(env => env.key === envKey);
+        const updatedEnv = environments.find(env => env.key === envKey);
         cachedEnv.killSwitch = updatedEnv.killSwitch;
-        proxy.writeQuery({query: GET_FLAGS, data: cachedData});
+        proxy.writeQuery({query: GET_FLAGS, variables: {projKey: projKey}, data: cachedData});
       },
     });
   };
 
   toggleDrawer = () => this.props.navigation.toggleDrawer();
+  selectEnv = (projKey, envKey) => this.props.navigation.navigate('Dashboard', {projKey, envKey});
 
   componentDidMount() {
-    this.props.navigation.setParams({toggleDrawer: this.toggleDrawer});
+    const projKey = this.props.navigation.getParam("projKey") || "default";
+    const envKey = this.props.navigation.getParam("envKey") || "production";
+    console.log(`ProjKey is ${projKey}`);
+    this.props.navigation.setParams({
+      toggleDrawer: this.toggleDrawer,
+      selectEnv: this.selectEnv,
+      projKey: projKey,
+      envKey: envKey,
+    });
   }
 
   render() {
+    const projKey = this.props.navigation.getParam('projKey');
+    console.log(`Project key is: ${projKey}`);
     return (
-      <Query query={GET_FLAGS}>
+      <Query query={GET_FLAGS} variables={{projKey}}>
         {
           ({loading, error, data, refetch}) => {
             if (error) return <Text>{`Error! ${error.message}`}</Text>;
