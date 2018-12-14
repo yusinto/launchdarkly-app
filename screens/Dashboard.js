@@ -1,16 +1,20 @@
 import React, {Component} from 'react';
 import {createStackNavigator} from 'react-navigation';
-import {View, Text, FlatList, Switch, StyleSheet, Image, Button} from 'react-native';
-import gql from "graphql-tag";
-import {Query} from "react-apollo";
+import {Text, FlatList, Switch} from 'react-native';
+import gql from 'graphql-tag';
+import {Mutation, Query, graphql} from 'react-apollo';
 import styled from 'styled-components/native';
 import {Svg} from 'expo';
 import {Entypo} from '@expo/vector-icons';
 import colors from '../constants/Colors';
 
+// HACK: hardcode project and environment for now
+const PROJKEY = 'string';
+const ENVKEY = 'production';
+
 const GET_FLAGS = gql`
     {
-        flags(projKey: "string") {
+        flags(projKey: "${PROJKEY}") {
             name
             key
             version
@@ -22,15 +26,17 @@ const GET_FLAGS = gql`
         }
     }
 `;
-
-const HeaderContainer = styled.View`
-  margin: 20px 20px;
-  border-bottom-width: 1px;
-  border-bottom-color: rgba(0,0,0,.1);
-`;
-const HeaderText = styled.Text`
-  font-size: 20px;
-  font-weight: 400;
+const TOGGLE_KILLSWITCH = gql`
+    mutation ToggleKillSwitch($projKey: String!, $envKey: String!, $flagKey: String!) {
+        toggleKillSwitch(projKey: $projKey, envKey: $envKey, flagKey: $flagKey) {
+            name
+            key
+            environments {
+                key
+                killSwitch
+            }
+        }
+    }
 `;
 const ListItem = styled.View`
   flex-direction: row;
@@ -71,14 +77,9 @@ class DashboardScreen extends Component {
     },
   });
 
-  renderHeader = () =>
-    <HeaderContainer>
-      <HeaderText>Your feature flags</HeaderText>
-    </HeaderContainer>;
-
-  renderItem = ({item: {key, name, environments}}) => {
+  renderItem = ({item: {key: flagKey, name, environments}}) => {
     // HACK: hardcode to production for now
-    const {killSwitch} = environments.find(e => e.key === 'production');
+    const {killSwitch} = environments.find(env => env.key === ENVKEY);
     return (
       <ListItem>
         <ListItemLeftGroup>
@@ -93,7 +94,9 @@ class DashboardScreen extends Component {
           <FlagDisplayName>{name}</FlagDisplayName>
         </ListItemLeftGroup>
         <Switch
-          onValueChange={this._handleToggleSwitch}
+          onValueChange={() => {
+            this.props.toggleKillSwitch({variables: {flagKey}});
+          }}
           value={killSwitch}
           trackColor={{true: colors.secondary}}
         />
@@ -129,8 +132,24 @@ class DashboardScreen extends Component {
   }
 }
 
+const DashboardScreenGraphql = graphql(TOGGLE_KILLSWITCH, {
+  name: 'toggleKillSwitch',
+  options: {
+    variables: {
+      projKey: PROJKEY,
+      envKey: ENVKEY,
+    },
+    update: (proxy, {data: {toggleKillSwitch}}) => {
+      const cachedData = proxy.readQuery({ query: GET_FLAGS });
+      const modifiedFlag = cachedData.flags.find(f => f.key === toggleKillSwitch.key);
+      modifiedFlag.environments = toggleKillSwitch.environments;
+      proxy.writeQuery({ query: GET_FLAGS, data: cachedData });
+    },
+  },
+})(DashboardScreen);
+
 export default createStackNavigator({
   Dashboard: {
-    screen: DashboardScreen,
+    screen: DashboardScreenGraphql,
   },
 });
