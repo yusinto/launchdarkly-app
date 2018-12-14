@@ -77,8 +77,8 @@ class DashboardScreen extends Component {
     },
   });
 
-  renderItem = ({item: {key: flagKey, name, environments}}) => {
-    // HACK: hardcode to production for now
+  renderItem = (item, toggleKillSwitch) => {
+    const {name, environments} = item;
     const {killSwitch} = environments.find(env => env.key === ENVKEY);
     return (
       <ListItem>
@@ -94,20 +94,48 @@ class DashboardScreen extends Component {
           <FlagDisplayName>{name}</FlagDisplayName>
         </ListItemLeftGroup>
         <Switch
-          onValueChange={() => {
-            this.props.toggleKillSwitch({variables: {flagKey}});
-          }}
+          onValueChange={() => this.handleToggle(item, toggleKillSwitch)}
           value={killSwitch}
           trackColor={{true: colors.secondary}}
         />
       </ListItem>);
   };
 
+  handleToggle = ({key: flagKey, name, version, kind, environments}, toggleKillSwitch) => {
+    toggleKillSwitch({
+      variables: {
+        projKey: PROJKEY,
+        envKey: ENVKEY,
+        flagKey,
+      },
+      optimisticResponse: {
+        toggleKillSwitch: {
+          __typename: 'Flag',
+          key: flagKey,
+          name,
+          version,
+          kind,
+          environments: [{
+            __typename: 'Environment',
+            key: ENVKEY,
+            killSwitch: !environments.find(env => env.key === ENVKEY).killSwitch,
+          }],
+        },
+      },
+      update: (proxy, {data: {toggleKillSwitch: {environments}}}) => {
+        const cachedData = proxy.readQuery({query: GET_FLAGS});
+        const cachedEnv = cachedData.flags.find(f => f.key === flagKey).environments.find(env => env.key === ENVKEY);
+        const updatedEnv = environments.find(env => env.key === ENVKEY);
+        cachedEnv.killSwitch = updatedEnv.killSwitch;
+        proxy.writeQuery({query: GET_FLAGS, data: cachedData});
+      },
+    });
+  };
+
   toggleDrawer = () => this.props.navigation.toggleDrawer();
 
   componentDidMount() {
     this.props.navigation.setParams({toggleDrawer: this.toggleDrawer});
-    // this.toggleDrawer();
   }
 
   render() {
@@ -117,13 +145,17 @@ class DashboardScreen extends Component {
           ({loading, error, data, refetch}) => {
             if (error) return <Text>{`Error! ${error.message}`}</Text>;
             return (
-              <FlatList
-                data={data.flags}
-                renderItem={this.renderItem}
-                ItemSeparatorComponent={Separator}
-                onRefresh={() => refetch()}
-                refreshing={loading}
-              />
+              <Mutation mutation={TOGGLE_KILLSWITCH}>
+                {(toggleKillSwitch) =>
+                  <FlatList
+                    data={data.flags}
+                    renderItem={({item}) => this.renderItem(item, toggleKillSwitch)}
+                    ItemSeparatorComponent={Separator}
+                    onRefresh={() => refetch()}
+                    refreshing={loading}
+                  />
+                }
+              </Mutation>
             );
           }
         }
@@ -132,24 +164,8 @@ class DashboardScreen extends Component {
   }
 }
 
-const DashboardScreenGraphql = graphql(TOGGLE_KILLSWITCH, {
-  name: 'toggleKillSwitch',
-  options: {
-    variables: {
-      projKey: PROJKEY,
-      envKey: ENVKEY,
-    },
-    update: (proxy, {data: {toggleKillSwitch}}) => {
-      const cachedData = proxy.readQuery({ query: GET_FLAGS });
-      const modifiedFlag = cachedData.flags.find(f => f.key === toggleKillSwitch.key);
-      modifiedFlag.environments = toggleKillSwitch.environments;
-      proxy.writeQuery({ query: GET_FLAGS, data: cachedData });
-    },
-  },
-})(DashboardScreen);
-
 export default createStackNavigator({
   Dashboard: {
-    screen: DashboardScreenGraphql,
+    screen: DashboardScreen,
   },
 });
